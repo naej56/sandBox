@@ -45,7 +45,7 @@ $mail->Body = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "h
 </body>
 </html>';
 $mail->AltBody = 'Bonjour,\n..Vous trouverez en pièce jointe votre devis.\n..\n..Pour toutes demande complémentaire vous pouvez me contacter en réponse de ce mail ou m\'appeler au 07 81 23 20 65';
-
+$mail->addAttachment('Devis.pdf');
 if(!$mail->send()) {
     echo 'Message could not be sent.';
     echo 'Mailer Error: ' . $mail->ErrorInfo;
