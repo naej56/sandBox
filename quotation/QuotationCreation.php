@@ -18,9 +18,9 @@
 		<!-- font-awesome -->
 		<link href="//localhost/cdn/font-awesome-4.6.3/css/font-awesome.min.css" rel="stylesheet">
 		<!-- Bootstrap custom -->
-		<link href="//localhost/quoma/public/css/bootstrap-kowa.css" rel="stylesheet">
+		<!--<link href="//localhost/quoma/public/css/bootstrap-kowa.css" rel="stylesheet">-->
 		<!-- quoma -->
-		<link href="//localhost/quoma/public/css/kowa.css" rel="stylesheet">
+		<link href="//localhost/quoma/public/css/quoma.css" rel="stylesheet">
 
 	</head>
 

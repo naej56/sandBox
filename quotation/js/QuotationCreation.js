@@ -21,13 +21,13 @@ function AddLine(table){
 	newCell = newLine.insertCell(1)
 	//newCell.innerHTML = '<p id="LineId"></p>'
 	newCell = newLine.insertCell(2)
-	newCell.innerHTML = 'Qte'
+	newCell.innerHTML = '1'
 	newCell = newLine.insertCell(3)
-	newCell.innerHTML = 'Prix Unit.'
+	newCell.innerHTML = '10'
 	newCell = newLine.insertCell(4)
-	newCell.innerHTML = 'tva'
+	newCell.innerHTML = '2'
 	newCell = newLine.insertCell(5)
-	newCell.innerHTML = 'PV tot TTC'
+	newCell.innerHTML = '12'
 	UpdateLineNumber(table)
 }
 
