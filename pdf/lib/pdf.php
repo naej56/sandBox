@@ -1,11 +1,11 @@
 <?php 
 namespace Pdf;
 use Exception;
-require('fpdf.php');
+require('FpdfScript.php');
 //use lib;
 date_default_timezone_set('Europe/Paris');
 
-class Pdf extends FPDF{
+class Pdf extends FpdfScript{
 	
 	function genPage($trame = false){
 		$this->AddFont('Ethnocentric', '', 'ethnocentric.php');
@@ -238,27 +238,7 @@ $pdf->genPage();
 $pdf->genHeader($company, $customer);
 $pdf->Output();
 
-/*$pdf = new pdf();
-$pdf->addPage();
-$pdf->SetFont('Arial','',12);
-//$pdf->SetXY(10,20);
-for ($i = 0; $i <= 6; $i++){
-	$idLine = $quotation[$i]['idLine'] + 1;
-	$product = $quotation[$i]['product'];
-	$quantity = $quotation[$i]['quantity'];
-	$pu = $quotation[$i]['pu'];
-	$tva = $quotation[$i]['tva'];
-	$pttc = $quotation[$i]['pttc'];
-	$pdf->SetXY(10, 20 * ($i + 1), 1);
-	$pdf->Cell(10, 20, $idLine, 1);
-	$pdf->Cell(100, 20, $product, 1);
-	$pdf->Cell(20, 20, $quantity, 1);
-	$pdf->Cell(20, 20, $pu, 1);
-	$pdf->Cell(20, 20, $tva, 1);
-	$pdf->Cell(20, 20, $pttc, 1);
-}
 
-$pdf->Output('D');*/
 
 
 
