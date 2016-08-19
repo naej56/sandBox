@@ -6,12 +6,12 @@
 * Date:    2015-12-20                                                          *
 * Author:  Olivier PLATHEY                                                     *
 *******************************************************************************/
-namespace Pdf;
-use Exception;
+//namespace pdf\lib;
+//use Exception;
 
 define('FPDF_VERSION','1.81');
 
-class FPDF
+class Fpdf
 {
 protected $page;               // current page number
 protected $n;                  // current object number

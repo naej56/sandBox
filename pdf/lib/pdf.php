@@ -1,17 +1,56 @@
 <?php 
-namespace Pdf;
-use Exception;
-require('FpdfScript.php');
+//namespace pdf\lib;
+//use Exception;
+//use pdf\lib\FpdfScript;
 //use lib;
+require_once 'FpdfScript.php';
+
 date_default_timezone_set('Europe/Paris');
 
 class Pdf extends FpdfScript{
+
+	//helper function
 	
+	/**
+	 * @param  int absice du coin supperieur gauche
+	 * @param  int ordonnée du coin supperieur gauche
+	 * @param  int largeur
+	 * @param  int hauteur
+	 * @param  int rayon des angles
+	 * @param  string nombre d'angles arrondi par defaut 1234
+	 * @param  string type de dessin F=plein D=contour par defaut FD
+	 * @param  int couleur (niveau de gris) de remplissage par defaut 255
+	 */
+	function drawRC($x, $y, $w, $h, $r, $corner = '1234', $drawType = 'FD', $fillColor = 255){
+		$this->SetFillColor($fillColor);
+		$this->RoundedRect($x, $y, $w, $h, $r, $corner, $drawType);
+		$this->SetFillColor(255);
+		$this->SetXY($x, $y);
+	}
+
+	/**
+	 * @param  int absice du coin supperieur gauche
+	 * @param  int ordonnée du coin supperieur gauche
+	 * @param  int largeur
+	 * @param  int hauteur
+	 * @param  string texte à afficher dans la cellule par defaut vide
+	 * @param  string nom de la police par defaut helvetica
+	 * @param  string style de la police vide=normale(defaut) B=gras I=italic U=souligné
+	 * @param  integer taille de la police par defaut 11
+	 */
+	function drawMC($x, $y, $w, $h, $text = '', $font = 'helvetica', $style = '', $size = 11){
+		$this->SetXY($x, $y);
+		$this->SetFont($font, $style, $size);
+		$this->MultiCell($w, $h, $text);
+		$this->SetXY($x, ($y + $h));
+	}
+
 	function genPage($trame = false){
 		$this->AddFont('Ethnocentric', '', 'ethnocentric.php');
 		$this->AddPage();
 		$this->SetMargins(10, 10);
-		$this->SetFont('Courier', '', 16);
+		$this->SetFont('helvetica', '', 16);
+		$this->AliasNbPages();
 		if ($trame) {
 			// contour global
 			$this->Cell(0, 265, '', 1);
@@ -20,103 +59,58 @@ class Pdf extends FpdfScript{
 			$this->Cell(0, 80, '', 1);
 			// info entreprise
 			$this->SetXY(10, 10);
-			$this->Cell(85, 80, '',1);
+			$this->Cell(85, 80, '', 1);
 		}
-		
 	}
 
-	function genHeader($company, $customerAddr){
+	
+
+	function genHeader(){
 		// trame de fond du devis
-		$this->genShading();
+		//$this->genShading();
 		// cachet de l'entreprise
-		$this->genCompanyStamp($company);
-
+		//$this->genCompanyStamp();
 		// adresse positionnée pour les enveloppes fenêtrées
-		$this->genCustomerAddress($customerAddr);
-
+		$this->genCustomerAddress();
 		// positionnement à la fin de la génération du header
 		$this->SetXY(10, 90);
-		
 	}
 
-	function genShading(){
-		$this->SetXY(100, 10);
-		$this->SetFont('Helvetica', 'BU', 28);
-		$this->Cell(100, 12, 'DEVIS pour traveau');
-		$this->SetXY(100, 22);
-		$this->SetFont('Helvetica', '', 12);
-		$this->Cell(50, 6, 'Date : ' . date('d/m/Y'));
-		$this->Cell(45, 6, 'Fin de val : ' . date('d/m/Y', strtotime('+1 month')));
-		$this->SetXY(100, 28);
-		$this->Cell(50, 6, 'Num. : ' . rand(50, 1000));
-		$this->SetXY(100, 36);
-		$this->SetFont('Helvetica', 'B', 12);
-		$this->SetFillColor(200);
-		$this->Cell(95, 6, 'Destinataire :', 0, 0, '',  true);
-	}
-
-	function genCompanyStamp($company){
-		$this->Image($company->getLogo(), 10, 10, 30);
-		$this->SetXY(40, 11);
-		$this->SetFont('ethnocentric', '', 18);
-		$companyName = $company->getCompanyName();
-		$explCN = explode(' ', $companyName);	
-		$this->Cell(50, 10, $explCN[0] . ' ' . $explCN[1]);
-		$this->SetXY(40, 21);
-		$this->Cell(50, 10, $explCN[2]);
-		$this->SetXY(10, 36);
-		$this->SetFont('Helvetica', 'B', 12);
-		$this->SetFillColor(200);
-		$this->Cell(85, 6, 'Adresse :', 0, 0, '',  true);
-		$this->SetFont('Helvetica', '', 12);
-		$this->SetXY(10, 43);
-		$companyAddr = $company->getAddr();
-		$this->MultiCell(85, 5, $companyAddr['name']);
-		for ($i = 0; $i < count($companyAddr['street']); $i++){
-			if (strlen($companyAddr['street'][$i]) > 0){
-				$this->SetX(10);
-				$this->MultiCell(85, 5, $companyAddr['street'][$i]);
-			}
-		}
-		$this->SetX(10);
-		$this->SetFont('Helvetica', 'B', 12);
-		$this->Cell(85, 5, $companyAddr['city']);
-		$this->SetXY(10, 60);
-		$this->SetFont('Helvetica', 'B', 12);
-		$this->SetFillColor(200);
-		$this->Cell(85, 6, 'Contact :', 0, 0, '',  true);
-		$this->SetFont('Helvetica', '', 12);
-		$this->SetXY(10, 67);
-		$this->Cell(30, 5, 'Telephone :');
-		$this->Cell(55, 5, '06 10 20 30 40');
-		$this->SetXY(10, 72);
-		$this->Cell(30, 5, 'E-mail :');
-		$this->Cell(55, 5, 'Bmw056@laposte.net');
-	}
-
-	function genCustomerAddress($customer){
-		$customerAddr = $customer->getAddr();
-		$this->SetXY(100, 45);
-		$this->Cell(95, 34, '', 1);// encadré de l'addresse
-		$this->SetFont('Courier', '', 11);
-		$this->SetXY(100, 45 );
-		$this->MultiCell(95, 5, $customerAddr['name']);
-		for ($i = 0; $i < count($customerAddr['street']); $i++){
-			if (strlen($customerAddr['street'][$i]) > 0){
-				$this->SetX(100);
-				$this->MultiCell(95, 5, $customerAddr['street'][$i]);
-			}
-		}
-		$this->SetX(100);
-		$this->SetFont('Courier', 'B', 12);
-		$this->MultiCell(95, 7, $customerAddr['city']);
+	function genCustomerAddress(){
+		$this->drawRC(100, 33, 95, 10, 2, '1234', 'F', 230);
+		$this->drawRC(100, 45, 95, 34, 2, '1234', 'D');
+		$this->drawMC(102, 47, 95, 5, 'Le Dantec Jean-Marie');
+		$this->drawMC(102, 52, 95, 5, '13 rue Henri Sellier');
+		$this->drawMC(102, 57, 95, 5, '');
+		$this->SetXY(102, ($this->GetY() + 5));
+		$this->SetFont('helvetica', 'B', 12);
+		$this->MultiCell(95, 5, '56100 LORIENT');
 	}
 
 	function genTable(){
 		$this->SetXY(10, 90);
 	}
-	function genFooter(){
+	
+	function footer(){
+		//contour du footer
+		$this->RoundedRect(10, 277, 190, 10, 2, '1234', 'D');
+		//mention légales
+		$this->SetXY(10, -20);
+		$this->SetFont('helvetica', 'I', 8);
+		$this->Cell(160, 10, 'TVA non applicable, art. 293 B du CGI.');
+		//pagination
+		$this->SetXY(170, -20);
+		$this->SetFont('helvetica', 'I', 10);
+		$this->Cell(30, 10, 'Page ' . $this->PageNo() . ' / {nb}', 0, 0, 'R');
+	}
 
+	function test(){
+		//test des taille de texte
+		/*for($i = 0; $i < 18; $i++){
+			$taille = 1 + ($i * 2);
+			$this->SetFont('Courier', '', $taille);
+			$this->MultiCell(190, 10, 'Texte de réference pour la taille ' . $taille);
+		}*/
 	}
 
 	// helper pour debug mise en page
@@ -137,7 +131,7 @@ class Pdf extends FpdfScript{
 		$this->SetXY($x, $y);
 	}
 }
-
+/*
 class Company{
 	private $name = "LE GOFF KEVIN";
 	private $street1 = "Restergal";
@@ -228,7 +222,7 @@ class QuotationTable{
 		return $table;
 	}
 }
-
+/*
 $company = new Company;
 $customer = new Customer;
 $quotationTable = new QuotationTable;
@@ -236,7 +230,7 @@ $pdf = new Pdf('P', 'mm', 'A4');
 $pdf->genPage();
 //$customerAddr = $customer->getAddr();
 $pdf->genHeader($company, $customer);
-$pdf->Output();
+$pdf->Output();*/
 
 
 

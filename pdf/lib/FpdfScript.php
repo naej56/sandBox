@@ -1,7 +1,10 @@
 <?php 
-require_once('fpdf.php');
+//namespace pdf\lib;
+//use Exception;
+//use pdf\lib\Pdf;
+require_once 'Fpdf.php';
 
-class FpdfScript extends fpdf{
+class FpdfScript extends Fpdf{
 
 	/**
 	 * Permet de générer des rectangles avec des angles arrondis
