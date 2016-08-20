@@ -8,27 +8,95 @@ require_once 'FpdfScript.php';
 date_default_timezone_set('Europe/Paris');
 
 class Pdf extends FpdfScript{
-
-	//helper function
 	
-	/**
-	 * @param  int absice du coin supperieur gauche
-	 * @param  int ordonnée du coin supperieur gauche
-	 * @param  int largeur
-	 * @param  int hauteur
-	 * @param  int rayon des angles
-	 * @param  string nombre d'angles arrondi par defaut 1234
-	 * @param  string type de dessin F=plein D=contour par defaut FD
-	 * @param  int couleur (niveau de gris) de remplissage par defaut 255
-	 */
-	function drawRC($x, $y, $w, $h, $r, $corner = '1234', $drawType = 'FD', $fillColor = 255){
-		$this->SetFillColor($fillColor);
-		$this->RoundedRect($x, $y, $w, $h, $r, $corner, $drawType);
-		$this->SetFillColor(255);
-		$this->SetXY($x, $y);
+	protected $defaultFont;
+	protected $defaultFontStyle;
+	protected $defaultFontSize;
+	protected $defaultTextColor;
+	protected $defaultDrawColor;
+	protected $defaultFillColor;
+
+
+	function setDefault($font = 'helvetica', $fontStyle = '', $fontSize = 11, $textColor = [0], $drawColor = [0], $fillColor = [255]){
+		$this->defaultFont = $font;
+		$this->defaultFontStyle = $fontStyle;
+		$this->defaultFontSize = $fontSize;
+		$this->SetFont($font, $fontStyle, $fontSize);
+		if(count($textColor) == 3){
+			$this->defaultTextColor = $textColor;
+		} else {
+			$this->defaultDrawColor = $textColor;
+		}
+		$this->setTextColorArg($textColor);
+		if(count($drawColor) == 3){
+			$this->defaultDrawColor = $drawColor;
+		} else {
+			$this->defaultDrawColor = $drawColor;
+		}
+		$this->setDrawColorArg($drawColor);
+		if(count($fillColor) == 3){
+			$this->defaultFillColor = $fillColor;
+		} else {
+			$this->defaultFillColor = $fillColor;
+		}
+		$this->setFillColorArg($fillColor);
 	}
 
 	/**
+	 * traitement de la couleur de remplissage passée en argument d'une fonction
+	 * @param  array 	$color 	tableau contenant les valeur RGB des la couleur voulue, si une seul valeur est donnée le rendus sera en niveau de gris
+	 */
+	function setFillColorArg($color){
+		if(count($color) == 3){
+			$this->SetFillColor($color[0], $color[1], $color[2]);
+		} else {
+			$this->SetFillColor($color[0]);
+		}
+	}
+
+	/**
+	 * traitement de la couleur de trait passée en argument d'une fonction
+	 * @param  array 	$color 	tableau contenant les valeur RGB des la couleur voulue, si une seul valeur est donnée le rendus sera en niveau de gris
+	 */
+	function setDrawColorArg($color){
+		if(count($color) == 3){
+			$this->SetDrawColor($color[0], $color[1], $color[2]);
+		} else {
+			$this->SetDrawColor($color[0]);
+		}
+	}
+
+	/**
+	 * traitement de la couleur de texte passée en argument d'une fonction
+	 * @param  array 	$color 	tableau contenant les valeur RGB des la couleur voulue, si une seul valeur est donnée le rendus sera en niveau de gris
+	 */
+	function setTextColorArg($color){
+		if(count($color) == 3){
+			$this->SetTextColor($color[0], $color[1], $color[2]);
+		} else {
+			$this->SetTextColor($color[0]);
+		}
+	}
+
+	/**
+	 * Dessine une rectangle avec des angles arrondis
+	 * @param  	int 	$x 			absice du coin supperieur gauche
+	 * @param  	int 	$y 			ordonnée du coin supperieur gauche
+	 * @param  	int 	$w 			largeur
+	 * @param  	int 	$h 			hauteur
+	 * @param  	int 	$r 			rayon des angles
+	 * @param  	string 	$corner 	nombre d'angles arrondi par defaut 1234
+	 * @param  	string 	$drawType 	type de dessin F=plein D=contour par defaut FD
+	 * @param  	array 	$fillColor 	couleur de remplissage par defaut 255
+	 */
+	function drawRC($x, $y, $w, $h, $r, $corner = '1234', $drawType = 'FD', $fillColor = [255]){
+		$this->setFillColorArg($fillColor);
+		$this->RoundedRect($x, $y, $w, $h, $r, $corner, $drawType);
+		$this->SetXY($x + $r, $y + $r);
+	}
+
+	/**
+	 * Dessine une multiCell
 	 * @param  int absice du coin supperieur gauche
 	 * @param  int ordonnée du coin supperieur gauche
 	 * @param  int largeur
@@ -45,65 +113,60 @@ class Pdf extends FpdfScript{
 		$this->SetXY($x, ($y + $h));
 	}
 
-	function genPage($trame = false){
-		$this->AddFont('Ethnocentric', '', 'ethnocentric.php');
+	/**
+	 * generation de la première page
+	 * @param  	int  	$marginLeft  	marge de gauche
+	 * @param  	int  	$marginTop   	marge du haut
+	 * @param  	int  	$marginRight 	marge de droite
+	 * @param  	array   $addFont     	police de caractères personnelle doit être un tableau multidimensionnel array[0][$fontName, $fontStyle, $fontFile]
+	 * @param 	string 	$displayZoom 	niveau de zoom lors de l'ouverture du document 	
+	 *                               	fullpage : affiche entièrement les pages à l'écran
+	 *									fullwidth : maximise la largeur des pages
+	 *									real : affiche la taille réelle (équivaut à un zoom de 100%)
+	 *									default : utilise le mode d'affichage par défaut du lecteur
+	 * @param 	string 	$displayLayout 	disposition dont les page vont s'afficher 	
+	 *                                 	single : affiche une seule page à la fois
+	 *                                 	continuous : affichage continu d'une page à l'autre
+	 *                                  two : affiche deux pages sur deux colonnes
+	 *                                  default : utilise le mode d'affichage par défaut du lecteur
+	 */
+	function genPage($marginLeft, $marginTop, $marginRight, $addFont = array(), $displayZoom = 'default', $displayLayout = 'default'){
+		$this->SetMargins($marginLeft, $marginTop, $marginRight);
+		if(count($addFont) > 0){
+			for($i = 0; $i < count($addFont); $i++){
+				$this->AddFont($addFont[$i][0],$addFont[$i][1], $addFont[$i][2]);
+			}
+		}
 		$this->AddPage();
-		$this->SetMargins(10, 10);
-		$this->SetFont('helvetica', '', 16);
 		$this->AliasNbPages();
-		if ($trame) {
-			// contour global
-			$this->Cell(0, 265, '', 1);
-			// contour header
-			$this->SetXY(10, 10);
-			$this->Cell(0, 80, '', 1);
-			// info entreprise
-			$this->SetXY(10, 10);
-			$this->Cell(85, 80, '', 1);
+		$this->SetDisplayMode($displayZoom, $displayLayout);
+		$this->SetCreator('Quoma');
+
+	}
+
+	/**
+	 * Remet la police caractère par défaut
+	 */
+	function setDefaultFont(){
+		if(!isset($this->defaultFontStyle)){
+			$this->SetFont($this->defaultFont, $this->defautFontStyle, $this->defaultFontSize);
+		} else {
+			$this->SetFont($this->defaultFont, '', $this->defaultFontSize);
 		}
 	}
 
-	
-
-	function genHeader(){
-		// trame de fond du devis
-		//$this->genShading();
-		// cachet de l'entreprise
-		//$this->genCompanyStamp();
-		// adresse positionnée pour les enveloppes fenêtrées
-		$this->genCustomerAddress();
-		// positionnement à la fin de la génération du header
-		$this->SetXY(10, 90);
-	}
-
-	function genCustomerAddress(){
-		$this->drawRC(100, 33, 95, 10, 2, '1234', 'F', 230);
-		$this->drawRC(100, 45, 95, 34, 2, '1234', 'D');
-		$this->drawMC(102, 47, 95, 5, 'Le Dantec Jean-Marie');
-		$this->drawMC(102, 52, 95, 5, '13 rue Henri Sellier');
-		$this->drawMC(102, 57, 95, 5, '');
-		$this->SetXY(102, ($this->GetY() + 5));
-		$this->SetFont('helvetica', 'B', 12);
-		$this->MultiCell(95, 5, '56100 LORIENT');
+	/**
+	 * affiche le pdf dans le navigateur
+	 * @param  string 	$name 	nom du fichier par defaut devis.pdf
+	 */
+	function outputFile($name = 'devis.pdf'){
+		$this->Output('I', $name, true);
 	}
 
 	function genTable(){
 		$this->SetXY(10, 90);
 	}
 	
-	function footer(){
-		//contour du footer
-		$this->RoundedRect(10, 277, 190, 10, 2, '1234', 'D');
-		//mention légales
-		$this->SetXY(10, -20);
-		$this->SetFont('helvetica', 'I', 8);
-		$this->Cell(160, 10, 'TVA non applicable, art. 293 B du CGI.');
-		//pagination
-		$this->SetXY(170, -20);
-		$this->SetFont('helvetica', 'I', 10);
-		$this->Cell(30, 10, 'Page ' . $this->PageNo() . ' / {nb}', 0, 0, 'R');
-	}
-
 	function test(){
 		//test des taille de texte
 		/*for($i = 0; $i < 18; $i++){
@@ -131,109 +194,5 @@ class Pdf extends FpdfScript{
 		$this->SetXY($x, $y);
 	}
 }
-/*
-class Company{
-	private $name = "LE GOFF KEVIN";
-	private $street1 = "Restergal";
-	private $street2 = "";
-	private $zipCode = "56240";
-	private $city = 'PLOUAY';
-	private $siret = "0123456789";
-	private $phone = "06 10 20 30 40";
-	private $mail = "Bmw056@laposte.net";
-	private $tvaintra = '523658741022336';
-	private $logo = '../logo.jpg';
-
-	public function getAddr(){
-		return $addr = [
-			'name' => $this->name,
-			'street' => [$this->street1, $this->street2],
-			'city' => $this->zipCode . ' ' . $this->city
-		];
-	}
-
-	public function getCompanyName(){
-		return $this->name;
-	}
-
-	public function getContact(){
-		return $contact = [
-			'phone' => $this->phone,
-			'mail' => $this->mail
-		];
-	}
-
-	public function getAdmin(){
-		return $admin = [
-			'siret' => $this->siret,
-			'tvaintra' => $this->tvaintra
-		];
-	}
-
-	public function getLogo(){
-		return $this->logo;
-	}
-}
-
-class Customer{
-	private $name = "Le Dantec";
-	private $firstName = "Jean-Marie";
-	private $street1 = "13 rue Henry Sellier";
-	private $street2 = "3eme etage droite";
-	private $zipCode = "56100";
-	private $city = "LORIENT";
-	
-	public function getAddr(){
-		return $addr = [
-					'name' => $this->name . ' ' . $this->firstName,
-					'street' => [$this->street1, $this->street2],
-					'city' => $this->zipCode . ' ' . $this->city
-				];
-	}
-};
-
-class Quotation{
-	public $quotationDate = "date('d/m/Y')";
-	public $quotationDateValid = "date('d/m/Y', strtotime('+1 month'))";
-	public $quotationNumber = "rand(50, 1000)";
-
-};
-
-class QuotationTable{
-	private $table;
-	
-	public function creation(){
-		$nbLine = rand(5, 15);
-		$prodName = 'Hac ex causa conlaticia stipe Valerius humatur ille Publicola et subsidiis amicorum mariti inops cum liberis uxor alitur Reguli et dotatur ex aerario filia Scipionis, cum nobilitas florem adultae virginis diuturnum absentia pauperis erubesceret patris.';
-		for ($i = 0; $i <= $nbLine; $i++){
-			$product = substr($prodName, 0, rand(5,50));
-			$quantity = rand(1, 100);
-			$pu = rand(1, 100);
-			$ptht =  $puht * $quantity;
-			$ptttc = $ptht * 20 / 100;
-			$table[$i] = [
-				"idLine" => $i,
-				"product" => $product,
-				"quantity" => $quantity,
-				"puht" => $puht,
-				"ptht" => $ptht,
-				"ptttc" => $ptttc];
-		};
-		return $table;
-	}
-}
-/*
-$company = new Company;
-$customer = new Customer;
-$quotationTable = new QuotationTable;
-$pdf = new Pdf('P', 'mm', 'A4');
-$pdf->genPage();
-//$customerAddr = $customer->getAddr();
-$pdf->genHeader($company, $customer);
-$pdf->Output();*/
-
-
-
-
 
  ?>
