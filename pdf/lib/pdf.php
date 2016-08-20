@@ -92,6 +92,7 @@ class Pdf extends FpdfScript{
 	function drawRC($x, $y, $w, $h, $r, $corner = '1234', $drawType = 'FD', $fillColor = [255]){
 		$this->setFillColorArg($fillColor);
 		$this->RoundedRect($x, $y, $w, $h, $r, $corner, $drawType);
+		$this->setFillColorArg(255);
 		$this->SetXY($x + $r, $y + $r);
 	}
 
