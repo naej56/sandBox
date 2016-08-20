@@ -89,28 +89,29 @@ class Pdf extends FpdfScript{
 	 * @param  	string 	$drawType 	type de dessin F=plein D=contour par defaut FD
 	 * @param  	array 	$fillColor 	couleur de remplissage par defaut 255
 	 */
-	function drawRC($x, $y, $w, $h, $r, $corner = '1234', $drawType = 'FD', $fillColor = [255]){
+	function drawRC($x, $y, $w, $h, $r, $drawType = 'FD', $corner = '1234', $fillColor = [255]){
 		$this->setFillColorArg($fillColor);
 		$this->RoundedRect($x, $y, $w, $h, $r, $corner, $drawType);
 		$this->setFillColorArg(255);
-		$this->SetXY($x + $r, $y + $r);
+		$this->SetXY($x + ceil($r / 2), $y + ceil($r / 2));
 	}
 
 	/**
 	 * Dessine une multiCell
-	 * @param  int absice du coin supperieur gauche
-	 * @param  int ordonnée du coin supperieur gauche
-	 * @param  int largeur
-	 * @param  int hauteur
-	 * @param  string texte à afficher dans la cellule par defaut vide
-	 * @param  string nom de la police par defaut helvetica
-	 * @param  string style de la police vide=normale(defaut) B=gras I=italic U=souligné
-	 * @param  integer taille de la police par defaut 11
+	 * @param  int 		absice du coin supperieur gauche
+	 * @param  int 		ordonnée du coin supperieur gauche
+	 * @param  int 		largeur
+	 * @param  int 		hauteur
+	 * @param  string 	texte à afficher dans la cellule par defaut vide
+	 * @param  string 	nom de la police par defaut helvetica
+	 * @param  string 	style de la police vide=normale(defaut) B=gras I=italic U=souligné
+	 * @param  integer 	taille de la police par defaut 11
 	 */
 	function drawMC($x, $y, $w, $h, $text = '', $font = 'helvetica', $style = '', $size = 11){
 		$this->SetXY($x, $y);
 		$this->SetFont($font, $style, $size);
 		$this->MultiCell($w, $h, $text);
+		$this->setDefaultFont();
 		$this->SetXY($x, ($y + $h));
 	}
 

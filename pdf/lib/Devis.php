@@ -19,6 +19,46 @@ class Devis extends Pdf{
 		$this->SetKeywords($keyWords);
 	}
 
+	function genCompagnyStamp($name, $street1, $zipCode, $city, $siret, $cellphone = '', $phone = '', $mail = '', $street2 = '', $logo = ''){
+		$this->ClippingRoundedRect(10, 10, 20, 15, 4, false);
+		$this->Image($logo, 10, 10, 20, 15, 'jpg');
+		$this->UnsetClipping();
+		$this->drawMC(35, 10, 55, 8, $name, 'ethnocentric', '', 25);
+		$this->SetXY(10, 30);
+		$this->drawRC(10, 30, 85, 6, 2, 'F', '12', [200]);
+		$this->drawRC(10, 30, 85, 49, 2, 'D', '1234');
+		$this->SetFont('helvetica', 'BU', 11);
+		$this->Cell(85, 4, 'Coordonnees :');
+		$this->drawMC(11, 38, 85, 5, $name);
+		$this->drawMC($this->GetX(), $this->GetY(), 85, 5, $street1);
+		$this->drawMC($this->GetX(), $this->GetY(), 85, 5, $street2);
+		$this->drawMC($this->GetX(), $this->GetY() + 2, 85, 5, $zipCode . '  ' . $city, 'helvetica', 'B', 12);
+		$this->SetXY($this->GetX(), $this->GetY() + 1);
+		$this->SetDrawColor(200);
+		$this->SetLineWidth(0.7);
+		$this->Line($this->GetX() + 2, $this->GetY(), $this->GetX() + 81, $this->GetY());
+		$this->SetLineWidth(0.2);
+		$this->SetDrawColor(0);
+		$this->SetDash();
+		$this->SetXY($this->GetX(), $this->GetY() + 1);
+		$this->drawMC($this->GetX(), $this->GetY(), 15, 5, 'Mail :', 'helvetica', 'BU', 11);
+		$this->drawMC($this->GetX(), $this->GetY(), 15, 5, 'Tel. :', 'helvetica', 'BU', 11);
+		$this->drawMC($this->GetX(), $this->GetY(), 15, 5, 'Siret :', 'helvetica', 'BU', 11);
+		$this->SetXY(26, 62);
+		$this->drawMC($this->GetX(), $this->GetY(), 60, 5, $mail);
+		$this->drawMC($this->GetX(), $this->GetY(), 60, 5, $cellphone);
+		$this->drawMC($this->GetX(), $this->GetY(), 60, 5, $siret);
+	}
+
+	function genQuotationHeading(){
+		$this->drawRC(100, 10, 95, 8, 2, 'F', '12', [200]);
+		$this->drawRC(100, 10, 95, 25, 2, 'D', '1234');
+		$this->SetFont('helvetica', 'BU', 16);
+		$this->Cell(91, 6, 'DEVIS :');
+		$this->SetXY(101, 19);
+		//$this->displayXY();
+	}
+
 	/**
 	 * Génération de l'adresse du client
 	 * @param  string 	$name      	nom du client
@@ -29,19 +69,15 @@ class Devis extends Pdf{
 	 * @param  string 	$street2   	rue seccondaire du client par défaut à vide
 	 */
 	function genCustomerAddress($name, $firstname, $street1, $zipCode, $city, $street2 = ''){
-		$this->drawRC(100, 33, 95, 10, 2, '1234', 'F', [200]);
-		$this->SetXY(102, 35);
-		$this->SetFont('helvetica', 'BU', 14);
-		$this->Cell(91, 6, 'Destinataire :');
-		$this->setDefaultFont();
-		$this->drawRC(100, 45, 95, 34, 2, '1234', 'D');
-		$this->drawMC(102, 47, 95, 5, $name . ' ' . $firstname);
-		$this->drawMC(102, 52, 95, 5, $street1);
-		$this->drawMC(102, 57, 95, 5, $street2);
-		$this->SetXY(102, ($this->GetY() + 5));
-		$this->SetFont('helvetica', 'B', 12);
-		$this->MultiCell(95, 5, $zipCode . ' ' . $city);
-		$this->setDefaultFont();
+		$this->drawRC(100, 39, 95, 6, 2, 'F', '12', [200]);
+		$this->drawRC(100, 39, 95, 40, 2, 'D', '1234');
+		$this->SetFont('helvetica', 'BU', 11);
+		$this->Cell(91, 4, 'Destinataire :');
+		$this->SetXY(101, 48);
+		$this->drawMC($this->GetX(), $this->GetY(), 95, 5, $name . ' ' . $firstname);
+		$this->drawMC($this->GetX(), $this->GetY(), 95, 5, $street1);
+		$this->drawMC($this->GetX(), $this->GetY(), 95, 5, $street2);
+		$this->drawMC($this->GetX(), $this->GetY() + 2, 95, 5, $zipCode . '  ' . $city, 'helvetica', 'B', 12);
 	}
 
 	//footer
@@ -62,12 +98,17 @@ class Devis extends Pdf{
 
 // init faker
 $faker = Faker\Factory::create('fr_FR');
-
+// tableau d'ajout de police de caractère
+$addFont = [['ethnocentric', '', 'ethnocentric.php']];
 // generation du pdf
 $devis = new Devis('P', 'mm', 'A4');
 $devis->setDefault();
 // generation de la page
-$devis->genPage(10, 10, 10, [], 'fullpage', 'continuous');
+$devis->genPage(10, 10, 10, $addFont, 'fullpage', 'continuous');
+// generation du cachet d'entreprise
+$devis->genCompagnyStamp('Le Goff Kevin', 'Restergal', '56240', 'PLOUAY', $faker->siret(), '07 81 23 20 65', '', 'kevin.legoff.carreleur@gmail.com', '', 'logo2.jpg');
+// generation de l'entete du devis
+$devis->genQuotationHeading();
 // generation de l'adresse du client
 $devis->genCustomerAddress($faker->lastName, $faker->firstname, $faker->streetAddress, $faker->postcode, strtoupper($faker->city));
 //generation du contenu
