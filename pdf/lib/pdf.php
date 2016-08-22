@@ -93,7 +93,8 @@ class Pdf extends FpdfScript{
 		$this->setFillColorArg($fillColor);
 		$this->RoundedRect($x, $y, $w, $h, $r, $corner, $drawType);
 		$this->setFillColorArg(255);
-		$this->SetXY($x + ceil($r / 2), $y + ceil($r / 2));
+		//$this->SetXY($x + ceil($r / 2), $y + ceil($r / 2));
+		$this->SetXY($x + $r - ceil($h / 2), $y + $r - ceil($h / 2));
 	}
 
 	/**
@@ -105,12 +106,13 @@ class Pdf extends FpdfScript{
 	 * @param  string 	texte à afficher dans la cellule par defaut vide
 	 * @param  string 	nom de la police par defaut helvetica
 	 * @param  string 	style de la police vide=normale(defaut) B=gras I=italic U=souligné
+	 * @param  string 	$align alignement du text dans la cellule
 	 * @param  integer 	taille de la police par defaut 11
 	 */
-	function drawMC($x, $y, $w, $h, $text = '', $font = 'helvetica', $style = '', $size = 11){
+	function drawMC($x, $y, $w, $h, $text = '', $font = 'helvetica', $style = '', $size = 11, $align = 'J'){
 		$this->SetXY($x, $y);
 		$this->SetFont($font, $style, $size);
-		$this->MultiCell($w, $h, $text);
+		$this->MultiCell($w, $h, $text, 0, $align);
 		$this->setDefaultFont();
 		$this->SetXY($x, ($y + $h));
 	}
